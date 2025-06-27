@@ -5,7 +5,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const createFormHandler = async (req, res) => {
   const questionSchema = z.object({
     questionText: z.string(),
-    type: z.enum(["PARAGRAPH", "SCALE"]),
+    type: z.enum(["PARAGRAPH", "MCQ"]),
     options: z.array(z.string()).optional(),
   });
 
@@ -15,6 +15,7 @@ const createFormHandler = async (req, res) => {
     startTime: z.string().datetime(),
     endTime: z.string().datetime(),
     questions: z.array(questionSchema),
+    theme: z.string(),
   });
 
   const parsed = inputSchema.safeParse(req.body);
@@ -22,7 +23,8 @@ const createFormHandler = async (req, res) => {
     return res.status(400).json({ success: false, message: "Invalid input" });
   }
 
-  const { title, description, startTime, endTime, questions } = parsed.data;
+  const { title, description, startTime, endTime, questions, theme } =
+    parsed.data;
 
   try {
     const form = await prisma.form.create({
@@ -31,12 +33,13 @@ const createFormHandler = async (req, res) => {
         description,
         startTime: new Date(startTime),
         endTime: new Date(endTime),
+        theme,
         creatorId: req.user.id,
         questions: {
           create: questions.map((q) => ({
             questionText: q.questionText,
             type: q.type,
-            options: q.type === "SCALE" ? q.options || [] : [],
+            options: q.type === "MCQ" ? q.options || [] : [],
           })),
         },
       },
@@ -123,6 +126,115 @@ const getFormByIdHandler = async (req, res) => {
       success: false,
       message: "Server error",
     });
+  }
+};
+
+const updateFormHandler = async (req, res) => {
+  const { formId } = req.params;
+
+  const questionSchema = z.object({
+    questionText: z.string(),
+    type: z.enum(["PARAGRAPH", "MCQ"]),
+    options: z.array(z.string()).optional(),
+  });
+
+  const inputSchema = z.object({
+    title: z.string().min(3),
+    description: z.string().min(3),
+    startTime: z.string().datetime(),
+    endTime: z.string().datetime(),
+    questions: z.array(questionSchema),
+    theme: z.string(),
+  });
+
+  const parsed = inputSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ success: false, message: "Invalid input" });
+  }
+
+  const { title, description, startTime, endTime, questions, theme } =
+    parsed.data;
+
+  try {
+    const existingForm = await prisma.form.findUnique({
+      where: { id: Number(formId) },
+    });
+
+    if (!existingForm) {
+      return res.status(404).json({
+        success: false,
+        message: "Form not found",
+      });
+    }
+
+    if (existingForm.creatorId !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to edit this form",
+      });
+    }
+    const formWithResponses = await prisma.form.findUnique({
+      where: { id: Number(formId) },
+      include: {
+        questions: {
+          include: {
+            answers: true,
+          },
+        },
+      },
+    });
+
+    const hasResponses = formWithResponses.questions.some(
+      (question) => question.answers.length > 0
+    );
+
+    if (hasResponses) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot edit form that has responses",
+      });
+    }
+    const updatedForm = await prisma.$transaction(async (tx) => {
+      await tx.question.deleteMany({
+        where: { formId: Number(formId) },
+      });
+      const form = await tx.form.update({
+        where: { id: Number(formId) },
+        data: {
+          title,
+          description,
+          startTime: new Date(startTime),
+          endTime: new Date(endTime),
+          theme,
+          questions: {
+            create: questions.map((q) => ({
+              questionText: q.questionText,
+              type: q.type,
+              options: q.type === "MCQ" ? q.options || [] : [],
+            })),
+          },
+        },
+        include: {
+          questions: true,
+        },
+      });
+
+      return form;
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Form updated successfully",
+      data: {
+        formId: updatedForm.id,
+        questions: updatedForm.questions,
+      },
+    });
+  } catch (err) {
+    console.error("Form update error:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -241,7 +353,7 @@ const getFormAnalyticsHandler = async (req, res) => {
           type: question.type,
           responses,
         };
-      } else if (question.type === "SCALE") {
+      } else if (question.type === "MCQ") {
         const optionCounts = {};
 
         // Initialize all options to 0
@@ -309,17 +421,26 @@ const getGeminiSummaryHandler = async (req, res) => {
       .join("\n");
 
     const finalPrompt = `
-Here are multiple paragraph-style feedback responses from a form:
+You are an AI language model helping to analyze feedback responses from a structured form.
+
+Below are multiple paragraph-style responses submitted anonymously:
 
 ${prompts}
 
-Summarize the key insights and feedback in simple and short English, covering common themes. Use bullet points if necessary.
+Your task is to:
+1. Identify and summarize **key insights and recurring themes** across all responses.
+2. Highlight any **positive, negative, or neutral sentiments** where applicable.
+3. Use clear and concise **bullet points**. Avoid repetition or overly generic statements.
+4. If no meaningful or valid responses were provided, simply respond with:
+   "No relevant responses were submitted for the given question(s)." 
+   (use "question" if there's only one)
+
+Avoid adding filler content. Keep the summary objective and helpful for decision-making.
 `;
 
     const result = await model.generateContent(finalPrompt);
-    const response = await result.response;
+    const response = result.response;
     const summary = response.text();
-
     return res.status(200).json({
       success: true,
       message: "Summary generated successfully",
@@ -341,4 +462,5 @@ export {
   deleteFormHandler,
   getFormAnalyticsHandler,
   getGeminiSummaryHandler,
+  updateFormHandler,
 };

@@ -21,6 +21,7 @@ model Form {
   description String
   startTime   DateTime
   endTime     DateTime
+  theme       String
   questions   Question[]
   responses   Response[]
   creatorId   Int
@@ -66,5 +67,5 @@ model PendingVerification {
 
 enum QuestionType {
   PARAGRAPH
-  SCALE
+  MCQ
 }

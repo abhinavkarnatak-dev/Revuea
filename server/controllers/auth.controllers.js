@@ -55,9 +55,9 @@ const signupHandler = async (req, res) => {
 
 const verifyEmailHandler = async (req, res) => {
   const inputSchema = z.object({
-  email: z.string().email(),
-  otp: z.string().length(6),
-});
+    email: z.string().email(),
+    otp: z.string().length(6),
+  });
 
   const parsedInput = inputSchema.safeParse(req.body);
 
@@ -97,6 +97,11 @@ const verifyEmailHandler = async (req, res) => {
       message: "Email verified successfully",
       data: {
         token,
+        user: {
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+        },
       },
     });
   } catch (error) {
@@ -144,6 +149,11 @@ const loginHandler = async (req, res) => {
       message: "Login successful",
       data: {
         token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
       },
     });
   } catch (error) {

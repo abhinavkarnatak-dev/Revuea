@@ -56,66 +56,6 @@ const submitResponseHandler = async (req, res) => {
   }
 };
 
-const getResponsesHandler = async (req, res) => {
-  const { formId } = req.params;
-
-  try {
-    const responses = await prisma.response.findMany({
-      where: { formId: Number(formId) },
-      include: {
-        answers: {
-          include: {
-            question: {
-              select: {
-                id: true,
-                questionText: true,
-                type: true,
-                options: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!responses.length) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No responses found" });
-    }
-
-    const grouped = {};
-
-    responses.forEach((resp) => {
-      resp.answers.forEach((ans) => {
-        const q = ans.question;
-        if (!grouped[q.id]) {
-          grouped[q.id] = {
-            questionId: q.id,
-            questionText: q.questionText,
-            type: q.type,
-            options: q.options,
-            answers: [],
-          };
-        }
-
-        grouped[q.id].answers.push(
-          ans.answerText ??
-            (ans.selectedOption !== null ? q.options[ans.selectedOption] : null)
-        );
-      });
-    });
-
-    return res.status(200).json({
-      success: true,
-      data: Object.values(grouped),
-    });
-  } catch (err) {
-    console.error("Get responses error");
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
 const exportResponsesHandler = async (req, res) => {
   const { formId } = req.params;
 
@@ -142,23 +82,38 @@ const exportResponsesHandler = async (req, res) => {
         .json({ success: false, message: "Form not found" });
     }
 
-    const csvRows = form.responses.map((response) => {
+    if (!form.responses || form.responses.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No responses to export" });
+    }
+
+    const csvRows = form.responses.map((response, index) => {
       const row = {};
+      row["Response No."] = index + 1;
 
       form.questions.forEach((q) => {
         const answer = response.answers.find((a) => a.quesId === q.id);
-        if (q.type === "SCALE") {
+
+        if (!answer) {
+          row[q.questionText] = "";
+          return;
+        }
+
+        if (q.type === "MCQ") {
+          const optionIndex = answer.selectedOption;
           row[q.questionText] =
-            answer?.selectedOption !== null &&
-            answer?.selectedOption !== undefined
-              ? q.options[answer.selectedOption]
+            optionIndex !== null &&
+            optionIndex !== undefined &&
+            Array.isArray(q.options) &&
+            q.options[optionIndex] !== undefined
+              ? q.options[optionIndex]
               : "";
         } else {
-          row[q.questionText] = answer?.answerText ?? "";
+          row[q.questionText] = answer.answerText ?? "";
         }
       });
 
-      row["Timestamp"] = response.timestamp.toISOString();
       return row;
     });
 
@@ -173,9 +128,11 @@ const exportResponsesHandler = async (req, res) => {
 
     return res.status(200).send(csv);
   } catch (err) {
-    console.error("Export CSV error");
-    return res.status(500).json({ success: false, message: "Server error" });
+    console.error("Export CSV error:", err); // Full stack trace
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
-export { submitResponseHandler, getResponsesHandler, exportResponsesHandler };
+export { submitResponseHandler, exportResponsesHandler };
