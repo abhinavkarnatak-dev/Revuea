@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+input:-webkit-autofill {
+  background-color: #2a354b !important;
+  -webkit-box-shadow: 0 0 0px 1000px #2a354b inset !important;
+  -webkit-text-fill-color: white !important;
+  color: white !important;
+  caret-color: white;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+@layer utilities {
+  .font-outfit-100 {
+    font-family: "Outfit", sans-serif;
+    font-weight: 100;
+  }
+
+  .font-outfit-200 {
+    font-family: "Outfit", sans-serif;
+    font-weight: 200;
+  }
+
+  .font-outfit-300 {
+    font-family: "Outfit", sans-serif;
+    font-weight: 300;
+  }
+
+  .font-outfit-400 {
+    font-family: "Outfit", sans-serif;
+    font-weight: 400;
+  }
+
+  .font-outfit-500 {
+    font-family: "Outfit", sans-serif;
+    font-weight: 500;
+  }
+
+  .font-outfit-600 {
+    font-family: "Outfit", sans-serif;
+    font-weight: 600;
+  }
+
+  .font-outfit-700 {
+    font-family: "Outfit", sans-serif;
+    font-weight: 700;
+  }
+
+  .font-outfit-800 {
+    font-family: "Outfit", sans-serif;
+    font-weight: 800;
+  }
+
+  .font-outfit-900 {
+    font-family: "Outfit", sans-serif;
+    font-weight: 900;
+  }
+}
