@@ -19,15 +19,17 @@ const FormInfoCard = (props) => {
       <div className="absolute inset-0 bg-gradient-to-b from-black/25 to-transparent pointer-events-none" />
 
       <div className="absolute top-3 right-3 flex gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all z-20">
-        <div
-          className={`text-sm cursor-pointer text-white p-2 rounded-lg hover:bg-purple-700/20 ${iconWrapperClasses}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            props.onEdit?.(props.id);
-          }}
-        >
-          <BsPencil className="w-full h-full" />
-        </div>
+        {!isEnded && (
+          <div
+            className={`text-sm cursor-pointer text-white p-2 rounded-lg hover:bg-purple-700/20 ${iconWrapperClasses}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              props.onEdit?.(props.id);
+            }}
+          >
+            <BsPencil className="w-full h-full" />
+          </div>
+        )}
         <div
           className={`text-sm cursor-pointer text-red-500 p-2 rounded-lg hover:bg-purple-700/20 ${iconWrapperClasses}`}
           onClick={(e) => {
