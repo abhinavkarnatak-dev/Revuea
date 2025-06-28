@@ -23,7 +23,7 @@ const LandingPage = () => {
           transition={{ delay: 0.2, duration: 0.8 }}
         >
           <img
-            src="../../../src/assets/lpImg.png"
+            src="/assets/lpImg.png"
             alt=""
             className="opacity-70 w-full"
           />

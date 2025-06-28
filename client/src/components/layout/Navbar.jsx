@@ -50,7 +50,7 @@ const Navbar = () => {
         transition={{ delay: 0.2, duration: 0.8 }}
       >
         <img
-          src="../../src/assets/logo.png"
+          src="/assets/logo.png"
           alt="Logo"
           className="w-7 lg:w-9"
         />
