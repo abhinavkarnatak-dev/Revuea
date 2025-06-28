@@ -8,13 +8,7 @@ import userRoutes from "./routes/user.routes.js";
 
 const app = express();
 app.use(express.json());
-app.use(
-  cors({
-    origin: "https://revuea.vercel.app",
-    credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors());
 
 const PORT = process.env.PORT || 8000;
 
