@@ -6,13 +6,6 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    proxy: {
-      "/api": {
-        target: "https://revuea-backend.onrender.com",
-        changeOrigin: true,
-        secure: false,
-      },
-    },
     host: true,
     port: 5173,
   },

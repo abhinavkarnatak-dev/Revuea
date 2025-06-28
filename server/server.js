@@ -10,14 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: [
-      "https://revuea.vercel.app",
-      "https://revuea.vercel.app/dashboard",
-      "https://revuea.vercel.app/login",
-      "https://revuea.vercel.app/signup",
-      "https://revuea.vercel.app/verify",
-      "https://revuea.vercel.app/user/profile",
-    ],
+    origin: "https://revuea.vercel.app",
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
   })
