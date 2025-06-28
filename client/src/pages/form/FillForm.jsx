@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import Button from "../../components/layout/Button";
 import Status from "../../components/layout/Status";
 import { motion } from "motion/react";
+import api from "../../services/api";
 
 const FillForm = () => {
   const { formId } = useParams();
@@ -23,7 +23,7 @@ const FillForm = () => {
     }
     const fetchForm = async () => {
       try {
-        const res = await axios.get(`/api/form/${formId}`);
+        const res = await api.get(`/form/${formId}`);
         const formData = res.data.data;
 
         setForm(formData);
@@ -68,7 +68,7 @@ const FillForm = () => {
         return;
       }
 
-      await axios.post(`/api/response/submit/${formId}`, {
+      await api.post(`/response/submit/${formId}`, {
         answers: filteredAnswers,
       });
 

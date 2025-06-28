@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-hot-toast";
 import Button from "../../components/layout/Button";
 import { motion } from "motion/react";
+import api from "../../services/api";
 
 const Profile = () => {
   const { token, setUser } = useAuth();
@@ -14,7 +14,7 @@ const Profile = () => {
 
   const fetchProfile = async () => {
     try {
-      const res = await axios.get("/api/user/profile", {
+      const res = await api.get("/user/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProfile(res.data.data);
@@ -30,8 +30,8 @@ const Profile = () => {
     if (!newName.trim()) return toast.error("Name cannot be empty");
 
     try {
-      const res = await axios.patch(
-        "/api/user/update",
+      const res = await api.patch(
+        "/user/update",
         { name: newName },
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-hot-toast";
 import FormInfoCard from "../../components/forms/FromInfoCard";
@@ -15,6 +14,7 @@ import {
 } from "recharts";
 import Button from "../../components/layout/Button";
 import { motion } from "motion/react";
+import api from "../../services/api";
 
 const Colors = [
   "#4ade80",
@@ -44,7 +44,7 @@ const Dashboard = () => {
 
   const openModal = async (form) => {
     try {
-      const res = await axios.get(`/api/form/${form.id}`, {
+      const res = await api.get(`/form/${form.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSelectedForm(res.data.data);
@@ -64,7 +64,7 @@ const Dashboard = () => {
 
   const handleEditForm = async (formId) => {
     try {
-      const res = await axios.get(`/api/form/${formId}`, {
+      const res = await api.get(`/form/${formId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEditFormData(res.data.data);
@@ -87,7 +87,7 @@ const Dashboard = () => {
   const fetchAnalytics = async () => {
     if (!selectedForm) return;
     try {
-      const res = await axios.get(`/api/form/${selectedForm.id}/analytics`, {
+      const res = await api.get(`/form/${selectedForm.id}/analytics`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAnalytics(res.data.data);
@@ -99,7 +99,7 @@ const Dashboard = () => {
   const handleGenerateSummary = async () => {
     try {
       setSummaryLoading(true);
-      const res = await axios.get(`/api/form/${selectedForm.id}/summary`, {
+      const res = await api.get(`/form/${selectedForm.id}/summary`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSummary(res.data.data.summary);
@@ -112,7 +112,7 @@ const Dashboard = () => {
 
   const fetchForms = async () => {
     try {
-      const res = await axios.get("/api/form/my-forms", {
+      const res = await api.get("/form/my-forms", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setForms(Array.isArray(res.data?.data) ? res.data.data : []);
@@ -126,8 +126,8 @@ const Dashboard = () => {
   const handleExportCSV = async () => {
     if (!selectedForm) return;
     try {
-      const response = await axios.get(
-        `/api/response/form/${selectedForm.id}/export`,
+      const response = await api.get(
+        `/response/form/${selectedForm.id}/export`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "blob",
@@ -288,8 +288,8 @@ const Dashboard = () => {
                         width="w-full md:w-1/2"
                         onClick={async () => {
                           try {
-                            await axios.patch(
-                              `/api/form/${selectedForm.id}/end`,
+                            await api.patch(
+                              `/form/${selectedForm.id}/end`,
                               {},
                               {
                                 headers: { Authorization: `Bearer ${token}` },
@@ -604,7 +604,7 @@ const Dashboard = () => {
                         onEdit={handleEditForm}
                         onDelete={async (id) => {
                           try {
-                            await axios.delete(`/api/form/${id}`, {
+                            await api.delete(`/form/${id}`, {
                               headers: { Authorization: `Bearer ${token}` },
                             });
                             toast.success("Form deleted");

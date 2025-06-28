@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import { backgrounds } from "../../utils/bgImg";
 import Button from "../layout/Button";
 import { motion } from "motion/react";
+import api from "../../services/api";
 
 const EditFormModal = ({ isOpen, onClose, onFormUpdated, formData }) => {
   const { token } = useAuth();
@@ -131,8 +131,8 @@ const EditFormModal = ({ isOpen, onClose, onFormUpdated, formData }) => {
       const startUTC = new Date(startTime).toISOString();
       const endUTC = new Date(endTime).toISOString();
 
-      const res = await axios.put(
-        `/api/form/${formData.id}`,
+      const res = await api.put(
+        `/form/${formData.id}`,
         {
           title,
           description,
