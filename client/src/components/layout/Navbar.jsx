@@ -1,5 +1,4 @@
 import { FaUserCircle, FaBars, FaTimes } from "react-icons/fa";
-import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
@@ -65,7 +64,6 @@ const Navbar = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.8 }}
       >
-        {/* <ThemeToggle /> */}
         <button
           className="md:hidden text-white"
           onClick={() => setShowMenu((prev) => !prev)}
