@@ -339,7 +339,7 @@ const CreateFormModal = ({ isOpen, onClose, onFormCreated }) => {
           {backgrounds.map((bg, i) => (
             <div
               key={i}
-              className={`relative w-22 md:w-28 h-16 md:h-20 lg:w-[47%] lg:h-[14%] rounded-lg overflow-hidden border-2 hover:opacity-50 ${
+              className={`relative w-22 md:w-28 h-16 md:h-20 lg:w-[47%] lg:h-[14%] rounded-lg overflow-hidden border-2 hover:opacity-50 transition-all duration-300 ${
                 theme === bg ? "border-purple-500" : "border-transparent"
               } cursor-pointer`}
               onClick={() => setTheme(bg)}
